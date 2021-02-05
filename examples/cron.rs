@@ -4,17 +4,25 @@ use cronic::Scheduler;
 async fn main() {
     match Scheduler::new()
         .set_context(())
-        .job("* * * * * *", |_| async {
-            println!("Every second!");
+        .job("@hourly", &|_| {
+            Box::pin(async {
+                println!("Every hour!");
+            })
         })
-        .job("*/5 * * * * *", |_| async {
-            println!("Every five seconds!");
+        .job("* * * * * *", &|_| {
+            Box::pin(async {
+                println!("Every second!");
+            })
         })
-        .job("*/5 * * * * *", |_| async {
-            println!("Every five seconds!");
+        .job("0 * * * * *", &|_| {
+            Box::pin(async {
+                println!("Every minute!");
+            })
         })
-    .start().await {
-        Ok(_) => {},
-        Err(err) => eprintln!("An error occured: {}", err)
+        .start()
+        .await
+    {
+        Ok(_) => {}
+        Err(err) => eprintln!("An error occured: {}", err),
     }
 }

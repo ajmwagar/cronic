@@ -4,18 +4,17 @@ use futures_util::future::join_all;
 use std::error::Error;
 use std::future::Future;
 use std::pin::Pin;
+
 use std::str::FromStr;
 use tokio::time::sleep;
 
-type JobOutput = Result<(), Box<dyn Error>>;
-
 /// Cronic Scheduler
-pub struct Scheduler<C: Sized + Default + Clone, F: Future<Output = T> + Send + 'static, T: Send + 'static> {
+pub struct Scheduler<C: 'static + Sized + Default + Clone> {
     context: Option<C>,
-    jobs: Vec<(String, Box<dyn Fn(C) -> F>)>
+    jobs: Vec<(String, &'static dyn Fn(C) -> Pin<Box<dyn Future<Output = ()>>>)>
 }
 
-impl<'a, C: Default + Clone, F: Future<Output = T> + Send, T: Send> Scheduler<C, F, T> {
+impl<'a, C: 'static + Default + Clone> Scheduler<C> {
     pub fn new() -> Self {
         Self {
             context: None,
@@ -23,12 +22,9 @@ impl<'a, C: Default + Clone, F: Future<Output = T> + Send, T: Send> Scheduler<C,
         }
     }
 
-    pub fn job<S: Into<String>>(mut self, cron_str: S, job: impl Fn(C) -> F + 'static) -> Self
-    where
-        F: Future<Output = T> + Send + 'static,
-        T: Send + 'static,
+    pub fn job<S: Into<String>>(mut self, cron_str: S, job: &'static impl Fn(C) -> Pin<Box<dyn Future<Output = ()>>>) -> Self
     {
-        self.jobs.push((cron_str.into(), Box::new(job)));
+        self.jobs.push((cron_str.into(), job));
         self
     }
 

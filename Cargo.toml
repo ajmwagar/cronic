@@ -3,6 +3,12 @@ name = "cronic"
 version = "0.1.0"
 authors = ["Avery Wagar <ajmw.subs@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/ajmwagar/cronic"
+license = "MIT"
+readme = "./README.md"
+description = """
+A cron-enabled task scheduler for `async` Rust.
+"""
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
